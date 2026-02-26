@@ -16,8 +16,8 @@
 # =============================================================================
 
 # ======================== EDIT THESE TWO LINES ========================
-BUCKET="your-bucket"              # Your S3 bucket name
-SOURCE_PREFIX="openalex/data"     # Path within bucket where OpenAlex gz files live
+BUCKET="codex-raw-data-us-east-1"              # Your S3 bucket name
+SOURCE_PREFIX="data"     # Path within bucket where OpenAlex gz files live
 # ======================================================================
 
 OUTPUT_PREFIX="openalex-parquet"
