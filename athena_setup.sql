@@ -2,10 +2,10 @@
 -- OpenAlex Athena Setup
 -- =============================================================================
 -- Run these queries in the Athena console ONE AT A TIME.
--- Replace 'your-bucket' with your actual bucket name.
+-- Replace 'codex-raw-data-us-east-1' with your actual bucket name.
 --
 -- FIRST: Go to Athena → Settings → set query result location to:
---   s3://your-bucket/athena-results/
+--   s3://codex-raw-data-us-east-1/athena-results/
 -- =============================================================================
 
 
@@ -18,7 +18,7 @@ CREATE DATABASE IF NOT EXISTS openalex;
 -- Works (partitioned by publication_year)
 CREATE EXTERNAL TABLE IF NOT EXISTS openalex.works
 STORED AS PARQUET
-LOCATION 's3://your-bucket/openalex-parquet/works/'
+LOCATION 's3://codex-raw-data-us-east-1/openalex-parquet/works/'
 TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
 
 -- Load partitions for works
@@ -27,121 +27,121 @@ MSCK REPAIR TABLE openalex.works;
 -- Authors
 CREATE EXTERNAL TABLE IF NOT EXISTS openalex.authors
 STORED AS PARQUET
-LOCATION 's3://your-bucket/openalex-parquet/authors/'
+LOCATION 's3://codex-raw-data-us-east-1/openalex-parquet/authors/'
 TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
 
 -- Institutions
 CREATE EXTERNAL TABLE IF NOT EXISTS openalex.institutions
 STORED AS PARQUET
-LOCATION 's3://your-bucket/openalex-parquet/institutions/'
+LOCATION 's3://codex-raw-data-us-east-1/openalex-parquet/institutions/'
 TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
 
 -- Sources
 CREATE EXTERNAL TABLE IF NOT EXISTS openalex.sources
 STORED AS PARQUET
-LOCATION 's3://your-bucket/openalex-parquet/sources/'
+LOCATION 's3://codex-raw-data-us-east-1/openalex-parquet/sources/'
 TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
 
 -- Publishers
 CREATE EXTERNAL TABLE IF NOT EXISTS openalex.publishers
 STORED AS PARQUET
-LOCATION 's3://your-bucket/openalex-parquet/publishers/'
+LOCATION 's3://codex-raw-data-us-east-1/openalex-parquet/publishers/'
 TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
 
 -- Topics
 CREATE EXTERNAL TABLE IF NOT EXISTS openalex.topics
 STORED AS PARQUET
-LOCATION 's3://your-bucket/openalex-parquet/topics/'
+LOCATION 's3://codex-raw-data-us-east-1/openalex-parquet/topics/'
 TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
 
 -- Funders
 CREATE EXTERNAL TABLE IF NOT EXISTS openalex.funders
 STORED AS PARQUET
-LOCATION 's3://your-bucket/openalex-parquet/funders/'
+LOCATION 's3://codex-raw-data-us-east-1/openalex-parquet/funders/'
 TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
 
 -- Domains
 CREATE EXTERNAL TABLE IF NOT EXISTS openalex.domains
 STORED AS PARQUET
-LOCATION 's3://your-bucket/openalex-parquet/domains/'
+LOCATION 's3://codex-raw-data-us-east-1/openalex-parquet/domains/'
 TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
 
 -- Fields
 CREATE EXTERNAL TABLE IF NOT EXISTS openalex.fields
 STORED AS PARQUET
-LOCATION 's3://your-bucket/openalex-parquet/fields/'
+LOCATION 's3://codex-raw-data-us-east-1/openalex-parquet/fields/'
 TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
 
 -- Subfields
 CREATE EXTERNAL TABLE IF NOT EXISTS openalex.subfields
 STORED AS PARQUET
-LOCATION 's3://your-bucket/openalex-parquet/subfields/'
+LOCATION 's3://codex-raw-data-us-east-1/openalex-parquet/subfields/'
 TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
 
 -- Awards
 CREATE EXTERNAL TABLE IF NOT EXISTS openalex.awards
 STORED AS PARQUET
-LOCATION 's3://your-bucket/openalex-parquet/awards/'
+LOCATION 's3://codex-raw-data-us-east-1/openalex-parquet/awards/'
 TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
 
 -- Concepts (legacy)
 CREATE EXTERNAL TABLE IF NOT EXISTS openalex.concepts
 STORED AS PARQUET
-LOCATION 's3://your-bucket/openalex-parquet/concepts/'
+LOCATION 's3://codex-raw-data-us-east-1/openalex-parquet/concepts/'
 TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
 
 -- Continents
 CREATE EXTERNAL TABLE IF NOT EXISTS openalex.continents
 STORED AS PARQUET
-LOCATION 's3://your-bucket/openalex-parquet/continents/'
+LOCATION 's3://codex-raw-data-us-east-1/openalex-parquet/continents/'
 TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
 
 -- Countries
 CREATE EXTERNAL TABLE IF NOT EXISTS openalex.countries
 STORED AS PARQUET
-LOCATION 's3://your-bucket/openalex-parquet/countries/'
+LOCATION 's3://codex-raw-data-us-east-1/openalex-parquet/countries/'
 TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
 
 -- Institution Types
 CREATE EXTERNAL TABLE IF NOT EXISTS openalex.institution_types
 STORED AS PARQUET
-LOCATION 's3://your-bucket/openalex-parquet/institution-types/'
+LOCATION 's3://codex-raw-data-us-east-1/openalex-parquet/institution-types/'
 TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
 
 -- Keywords
 CREATE EXTERNAL TABLE IF NOT EXISTS openalex.keywords
 STORED AS PARQUET
-LOCATION 's3://your-bucket/openalex-parquet/keywords/'
+LOCATION 's3://codex-raw-data-us-east-1/openalex-parquet/keywords/'
 TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
 
 -- Languages
 CREATE EXTERNAL TABLE IF NOT EXISTS openalex.languages
 STORED AS PARQUET
-LOCATION 's3://your-bucket/openalex-parquet/languages/'
+LOCATION 's3://codex-raw-data-us-east-1/openalex-parquet/languages/'
 TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
 
 -- Licenses
 CREATE EXTERNAL TABLE IF NOT EXISTS openalex.licenses
 STORED AS PARQUET
-LOCATION 's3://your-bucket/openalex-parquet/licenses/'
+LOCATION 's3://codex-raw-data-us-east-1/openalex-parquet/licenses/'
 TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
 
 -- SDGs (Sustainable Development Goals)
 CREATE EXTERNAL TABLE IF NOT EXISTS openalex.sdgs
 STORED AS PARQUET
-LOCATION 's3://your-bucket/openalex-parquet/sdgs/'
+LOCATION 's3://codex-raw-data-us-east-1/openalex-parquet/sdgs/'
 TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
 
 -- Source Types
 CREATE EXTERNAL TABLE IF NOT EXISTS openalex.source_types
 STORED AS PARQUET
-LOCATION 's3://your-bucket/openalex-parquet/source-types/'
+LOCATION 's3://codex-raw-data-us-east-1/openalex-parquet/source-types/'
 TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
 
 -- Work Types
 CREATE EXTERNAL TABLE IF NOT EXISTS openalex.work_types
 STORED AS PARQUET
-LOCATION 's3://your-bucket/openalex-parquet/work-types/'
+LOCATION 's3://codex-raw-data-us-east-1/openalex-parquet/work-types/'
 TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
 
 

@@ -3,7 +3,7 @@
 -- =============================================================================
 -- Run these in Athena AFTER the base tables are set up.
 -- These create new Parquet tables from nested arrays in works.
--- Replace 'your-bucket' with your actual bucket name.
+-- Replace 'codex-raw-data-us-east-1' with your actual bucket name.
 --
 -- These are optional but highly recommended — they make joins and
 -- filters on nested data much faster and easier.
@@ -14,7 +14,7 @@
 CREATE TABLE openalex.works_authorships
 WITH (
     format = 'PARQUET',
-    external_location = 's3://your-bucket/openalex-parquet/works_authorships/',
+    external_location = 's3://codex-raw-data-us-east-1/openalex-parquet/works_authorships/',
     write_compression = 'SNAPPY'
 ) AS
 SELECT
@@ -32,7 +32,7 @@ CROSS JOIN UNNEST(authorships) AS t(auth);
 CREATE TABLE openalex.works_locations
 WITH (
     format = 'PARQUET',
-    external_location = 's3://your-bucket/openalex-parquet/works_locations/',
+    external_location = 's3://codex-raw-data-us-east-1/openalex-parquet/works_locations/',
     write_compression = 'SNAPPY'
 ) AS
 SELECT
@@ -51,7 +51,7 @@ CROSS JOIN UNNEST(locations) AS t(loc);
 CREATE TABLE openalex.works_topics
 WITH (
     format = 'PARQUET',
-    external_location = 's3://your-bucket/openalex-parquet/works_topics/',
+    external_location = 's3://codex-raw-data-us-east-1/openalex-parquet/works_topics/',
     write_compression = 'SNAPPY'
 ) AS
 SELECT
@@ -68,7 +68,7 @@ CROSS JOIN UNNEST(topics) AS t(topic);
 CREATE TABLE openalex.works_concepts
 WITH (
     format = 'PARQUET',
-    external_location = 's3://your-bucket/openalex-parquet/works_concepts/',
+    external_location = 's3://codex-raw-data-us-east-1/openalex-parquet/works_concepts/',
     write_compression = 'SNAPPY'
 ) AS
 SELECT
@@ -86,7 +86,7 @@ CROSS JOIN UNNEST(concepts) AS t(concept);
 CREATE TABLE openalex.works_citations
 WITH (
     format = 'PARQUET',
-    external_location = 's3://your-bucket/openalex-parquet/works_citations/',
+    external_location = 's3://codex-raw-data-us-east-1/openalex-parquet/works_citations/',
     write_compression = 'SNAPPY'
 ) AS
 SELECT
@@ -101,7 +101,7 @@ CROSS JOIN UNNEST(referenced_works) AS t(ref);
 CREATE TABLE openalex.works_grants
 WITH (
     format = 'PARQUET',
-    external_location = 's3://your-bucket/openalex-parquet/works_grants/',
+    external_location = 's3://codex-raw-data-us-east-1/openalex-parquet/works_grants/',
     write_compression = 'SNAPPY'
 ) AS
 SELECT
