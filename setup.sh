@@ -58,7 +58,60 @@ echo "Found ${ENTITY_COUNT} entity folders. Listing:"
 aws s3 ls "s3://${BUCKET}/${SOURCE_PREFIX}/"
 echo ""
 
-# ---- Step 1: Create IAM Role ----
+# ---- Step 0: Grant this EC2 instance Glue + IAM permissions ----
+ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+
+# Detect the EC2 instance role name from instance metadata
+echo "Step 0: Granting Glue permissions to this EC2 instance..."
+TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 60" 2>/dev/null)
+EC2_INSTANCE_PROFILE=$(curl -s -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/iam/security-credentials/ 2>/dev/null)
+
+if [ -z "$EC2_INSTANCE_PROFILE" ]; then
+    echo "WARNING: Could not detect EC2 instance role. If you're not on EC2,"
+    echo "make sure your IAM user/role has Glue and IAM permissions."
+else
+    echo "  EC2 instance role detected: ${EC2_INSTANCE_PROFILE}"
+
+    # Attach Glue full access to the EC2 role
+    aws iam attach-role-policy \
+        --role-name "${EC2_INSTANCE_PROFILE}" \
+        --policy-arn arn:aws:iam::aws:policy/AWSGlueConsoleFullAccess \
+        2>/dev/null && echo "  ✓ Attached AWSGlueConsoleFullAccess" || echo "  (already attached or insufficient IAM permissions)"
+
+    # Attach IAM limited access so EC2 can create roles and PassRole for Glue
+    cat > /tmp/ec2-glue-iam-policy.json << EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "iam:CreateRole",
+        "iam:AttachRolePolicy",
+        "iam:GetRole",
+        "iam:PassRole"
+      ],
+      "Resource": [
+        "arn:aws:iam::${ACCOUNT_ID}:role/OpenAlexGlueRole"
+      ]
+    }
+  ]
+}
+EOF
+    POLICY_NAME="OpenAlexGlueSetupPolicy"
+    # Create or update the inline policy on the EC2 role
+    aws iam put-role-policy \
+        --role-name "${EC2_INSTANCE_PROFILE}" \
+        --policy-name "${POLICY_NAME}" \
+        --policy-document file:///tmp/ec2-glue-iam-policy.json \
+        2>/dev/null && echo "  ✓ Attached IAM PassRole policy" || echo "  (could not attach — you may need to add permissions manually)"
+
+    echo "  Waiting 10 seconds for policies to propagate..."
+    sleep 10
+fi
+echo ""
+
+# ---- Step 1: Create IAM Role for Glue ----
 echo "Step 1: Creating IAM role '${ROLE_NAME}'..."
 
 cat > /tmp/glue-trust-policy.json << 'EOF'
@@ -92,7 +145,6 @@ aws iam attach-role-policy \
 # Wait for role to propagate
 echo "Waiting 10 seconds for IAM role to propagate..."
 sleep 10
-ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 ROLE_ARN="arn:aws:iam::${ACCOUNT_ID}:role/${ROLE_NAME}"
 echo "IAM role ready. ARN: ${ROLE_ARN}"
 echo ""

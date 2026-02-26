@@ -12,11 +12,11 @@ This guide takes you from a raw OpenAlex S3 mirror to a fully queryable analytic
 ## Prerequisites
 
 - An AWS account
-- Your OpenAlex mirror in S3 (e.g., `s3://your-bucket/openalex/data/`)
+- Your OpenAlex mirror in S3 (e.g., `s3://codex-raw-data-us-east-1/openalex/data/`)
 - AWS CLI installed (`pip install awscli` or `brew install awscli`)
 - Basic terminal access
 
-**Replace `your-bucket` with your actual S3 bucket name throughout this guide.**
+**Replace `codex-raw-data-us-east-1` with your actual S3 bucket name throughout this guide.**
 
 ---
 
@@ -26,7 +26,7 @@ You need a place to store the converted Parquet files. You can use the same buck
 
 ```bash
 # Create a prefix for parquet output (no command needed — S3 creates prefixes automatically)
-# Your parquet files will go to: s3://your-bucket/openalex-parquet/
+# Your parquet files will go to: s3://codex-raw-data-us-east-1/openalex-parquet/
 ```
 
 ---
@@ -88,7 +88,7 @@ Glue reads its job scripts from S3. Upload all the scripts from this package:
 
 ```bash
 # From this directory, upload all glue scripts
-aws s3 cp glue_scripts/ s3://your-bucket/glue-scripts/ --recursive
+aws s3 cp glue_scripts/ s3://codex-raw-data-us-east-1/glue-scripts/ --recursive
 ```
 
 This uploads these scripts:
@@ -107,17 +107,17 @@ aws glue create-job \
   --role OpenAlexGlueRole \
   --command '{
     "Name": "glueetl",
-    "ScriptLocation": "s3://your-bucket/glue-scripts/convert_works.py",
+    "ScriptLocation": "s3://codex-raw-data-us-east-1/glue-scripts/convert_works.py",
     "PythonVersion": "3"
   }' \
   --default-arguments '{
     "--job-language": "python",
-    "--SOURCE_PATH": "s3://your-bucket/openalex/data/works",
-    "--OUTPUT_PATH": "s3://your-bucket/openalex-parquet/works",
-    "--TempDir": "s3://your-bucket/glue-temp/",
+    "--SOURCE_PATH": "s3://codex-raw-data-us-east-1/openalex/data/works",
+    "--OUTPUT_PATH": "s3://codex-raw-data-us-east-1/openalex-parquet/works",
+    "--TempDir": "s3://codex-raw-data-us-east-1/glue-temp/",
     "--enable-metrics": "true",
     "--enable-spark-ui": "true",
-    "--spark-event-logs-path": "s3://your-bucket/glue-logs/"
+    "--spark-event-logs-path": "s3://codex-raw-data-us-east-1/glue-logs/"
   }' \
   --glue-version "4.0" \
   --worker-type "G.2X" \
@@ -137,15 +137,15 @@ for ENTITY in authors institutions sources publishers topics funders domains fie
     --role OpenAlexGlueRole \
     --command "{
       \"Name\": \"glueetl\",
-      \"ScriptLocation\": \"s3://your-bucket/glue-scripts/convert_small_entity.py\",
+      \"ScriptLocation\": \"s3://codex-raw-data-us-east-1/glue-scripts/convert_small_entity.py\",
       \"PythonVersion\": \"3\"
     }" \
     --default-arguments "{
       \"--job-language\": \"python\",
       \"--ENTITY_NAME\": \"${ENTITY}\",
-      \"--SOURCE_PATH\": \"s3://your-bucket/openalex/data/${ENTITY}\",
-      \"--OUTPUT_PATH\": \"s3://your-bucket/openalex-parquet/${ENTITY}\",
-      \"--TempDir\": \"s3://your-bucket/glue-temp/\"
+      \"--SOURCE_PATH\": \"s3://codex-raw-data-us-east-1/openalex/data/${ENTITY}\",
+      \"--OUTPUT_PATH\": \"s3://codex-raw-data-us-east-1/openalex-parquet/${ENTITY}\",
+      \"--TempDir\": \"s3://codex-raw-data-us-east-1/glue-temp/\"
     }" \
     --glue-version "4.0" \
     --worker-type "G.1X" \
@@ -198,14 +198,14 @@ Athena needs somewhere to store query results.
 ```bash
 # Create a location for Athena query results (can be same bucket)
 # Just note the path — you'll need it in the console
-# s3://your-bucket/athena-results/
+# s3://codex-raw-data-us-east-1/athena-results/
 ```
 
 ### 5b: Configure Athena workgroup (first time only)
 
 1. Go to **AWS Console → Athena**
 2. If prompted, click **Settings** (top right) or **Edit settings**
-3. Set query result location to: `s3://your-bucket/athena-results/`
+3. Set query result location to: `s3://codex-raw-data-us-east-1/athena-results/`
 4. Click **Save**
 
 ### 5c: Create the database and tables
@@ -223,7 +223,7 @@ Then for each entity, create a table. Run these one at a time:
 -- Works (partitioned by publication_year)
 CREATE EXTERNAL TABLE IF NOT EXISTS openalex.works
 STORED AS PARQUET
-LOCATION 's3://your-bucket/openalex-parquet/works/'
+LOCATION 's3://codex-raw-data-us-east-1/openalex-parquet/works/'
 TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
 
 MSCK REPAIR TABLE openalex.works;
@@ -233,7 +233,7 @@ MSCK REPAIR TABLE openalex.works;
 -- Authors
 CREATE EXTERNAL TABLE IF NOT EXISTS openalex.authors
 STORED AS PARQUET
-LOCATION 's3://your-bucket/openalex-parquet/authors/'
+LOCATION 's3://codex-raw-data-us-east-1/openalex-parquet/authors/'
 TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
 ```
 
@@ -241,7 +241,7 @@ TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
 -- Institutions
 CREATE EXTERNAL TABLE IF NOT EXISTS openalex.institutions
 STORED AS PARQUET
-LOCATION 's3://your-bucket/openalex-parquet/institutions/'
+LOCATION 's3://codex-raw-data-us-east-1/openalex-parquet/institutions/'
 TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
 ```
 
@@ -249,7 +249,7 @@ TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
 -- Sources (journals, conferences, etc.)
 CREATE EXTERNAL TABLE IF NOT EXISTS openalex.sources
 STORED AS PARQUET
-LOCATION 's3://your-bucket/openalex-parquet/sources/'
+LOCATION 's3://codex-raw-data-us-east-1/openalex-parquet/sources/'
 TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
 ```
 
@@ -257,7 +257,7 @@ TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
 -- Publishers
 CREATE EXTERNAL TABLE IF NOT EXISTS openalex.publishers
 STORED AS PARQUET
-LOCATION 's3://your-bucket/openalex-parquet/publishers/'
+LOCATION 's3://codex-raw-data-us-east-1/openalex-parquet/publishers/'
 TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
 ```
 
@@ -265,7 +265,7 @@ TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
 -- Topics
 CREATE EXTERNAL TABLE IF NOT EXISTS openalex.topics
 STORED AS PARQUET
-LOCATION 's3://your-bucket/openalex-parquet/topics/'
+LOCATION 's3://codex-raw-data-us-east-1/openalex-parquet/topics/'
 TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
 ```
 
@@ -273,7 +273,7 @@ TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
 -- Funders
 CREATE EXTERNAL TABLE IF NOT EXISTS openalex.funders
 STORED AS PARQUET
-LOCATION 's3://your-bucket/openalex-parquet/funders/'
+LOCATION 's3://codex-raw-data-us-east-1/openalex-parquet/funders/'
 TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
 ```
 
@@ -281,7 +281,7 @@ TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
 -- Domains
 CREATE EXTERNAL TABLE IF NOT EXISTS openalex.domains
 STORED AS PARQUET
-LOCATION 's3://your-bucket/openalex-parquet/domains/'
+LOCATION 's3://codex-raw-data-us-east-1/openalex-parquet/domains/'
 TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
 ```
 
@@ -289,7 +289,7 @@ TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
 -- Fields
 CREATE EXTERNAL TABLE IF NOT EXISTS openalex.fields
 STORED AS PARQUET
-LOCATION 's3://your-bucket/openalex-parquet/fields/'
+LOCATION 's3://codex-raw-data-us-east-1/openalex-parquet/fields/'
 TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
 ```
 
@@ -297,7 +297,7 @@ TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
 -- Subfields
 CREATE EXTERNAL TABLE IF NOT EXISTS openalex.subfields
 STORED AS PARQUET
-LOCATION 's3://your-bucket/openalex-parquet/subfields/'
+LOCATION 's3://codex-raw-data-us-east-1/openalex-parquet/subfields/'
 TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
 ```
 
@@ -344,7 +344,7 @@ See `athena_flatten.sql` for ready-to-run queries, or run these:
 CREATE TABLE openalex.works_authorships
 WITH (
   format = 'PARQUET',
-  external_location = 's3://your-bucket/openalex-parquet/works_authorships/',
+  external_location = 's3://codex-raw-data-us-east-1/openalex-parquet/works_authorships/',
   write_compression = 'SNAPPY'
 ) AS
 SELECT
@@ -363,7 +363,7 @@ CROSS JOIN UNNEST(authorships) AS t(auth);
 CREATE TABLE openalex.works_locations
 WITH (
   format = 'PARQUET',
-  external_location = 's3://your-bucket/openalex-parquet/works_locations/',
+  external_location = 's3://codex-raw-data-us-east-1/openalex-parquet/works_locations/',
   write_compression = 'SNAPPY'
 ) AS
 SELECT
@@ -383,7 +383,7 @@ CROSS JOIN UNNEST(locations) AS t(loc);
 CREATE TABLE openalex.works_topics
 WITH (
   format = 'PARQUET',
-  external_location = 's3://your-bucket/openalex-parquet/works_topics/',
+  external_location = 's3://codex-raw-data-us-east-1/openalex-parquet/works_topics/',
   write_compression = 'SNAPPY'
 ) AS
 SELECT
@@ -412,7 +412,7 @@ def run_query(sql):
     response = athena.start_query_execution(
         QueryString=sql,
         QueryExecutionContext={'Database': 'openalex'},
-        ResultConfiguration={'OutputLocation': 's3://your-bucket/athena-results/'}
+        ResultConfiguration={'OutputLocation': 's3://codex-raw-data-us-east-1/athena-results/'}
     )
     query_id = response['QueryExecutionId']
 
@@ -454,7 +454,7 @@ from pyathena import connect
 import pandas as pd
 
 conn = connect(
-    s3_staging_dir='s3://your-bucket/athena-results/',
+    s3_staging_dir='s3://codex-raw-data-us-east-1/athena-results/',
     region_name='us-east-1'
 )
 
@@ -495,13 +495,13 @@ done
 
 **Athena says "table not found":** Make sure you selected the `openalex` database in the Athena dropdown (left sidebar).
 
-**Athena shows no data:** Check that the Glue job completed successfully and Parquet files exist at the expected S3 path: `aws s3 ls s3://your-bucket/openalex-parquet/works/`
+**Athena shows no data:** Check that the Glue job completed successfully and Parquet files exist at the expected S3 path: `aws s3 ls s3://codex-raw-data-us-east-1/openalex-parquet/works/`
 
 **Athena shows weird column names:** Parquet schema is inferred from the JSON. If some files have different schemas, you may get nulls. This is normal for OpenAlex — not all fields are present in all records.
 
 **MSCK REPAIR TABLE hangs or fails:** This only applies to the `works` table (partitioned by year). If it fails, you can create partitions manually:
 ```sql
-ALTER TABLE openalex.works ADD PARTITION (publication_year=2024) LOCATION 's3://your-bucket/openalex-parquet/works/publication_year=2024/';
+ALTER TABLE openalex.works ADD PARTITION (publication_year=2024) LOCATION 's3://codex-raw-data-us-east-1/openalex-parquet/works/publication_year=2024/';
 ```
 
 ---
