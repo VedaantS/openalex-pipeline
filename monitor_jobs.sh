@@ -2,7 +2,7 @@
 # Monitor all OpenAlex Glue job statuses
 # Run this to check progress: bash monitor_jobs.sh
 
-ENTITIES="works authors institutions sources publishers topics funders domains fields subfields"
+ENTITIES="works authors institutions sources publishers topics funders domains fields subfields awards concepts continents countries institution-types keywords languages licenses sdgs source-types work-types"
 
 echo "============================================"
 echo "OpenAlex Glue Job Status"

@@ -23,7 +23,18 @@ SOURCE_PREFIX="openalex/data"     # Path within bucket where OpenAlex gz files l
 OUTPUT_PREFIX="openalex-parquet"
 SCRIPTS_PREFIX="glue-scripts"
 ROLE_NAME="OpenAlexGlueRole"
-REGION=$(aws configure get region)
+REGION=$(aws configure get region 2>/dev/null)
+if [ -z "$REGION" ]; then
+    # Try EC2 instance metadata (IMDSv2)
+    TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 60" 2>/dev/null)
+    REGION=$(curl -s -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/placement/region 2>/dev/null)
+fi
+if [ -z "$REGION" ]; then
+    REGION="us-east-1"
+    echo "WARNING: Could not detect AWS region. Defaulting to ${REGION}"
+    echo "Set permanently with: aws configure set region ${REGION}"
+fi
+export AWS_DEFAULT_REGION="${REGION}"
 
 echo "============================================"
 echo "OpenAlex Pipeline Setup"
@@ -81,7 +92,9 @@ aws iam attach-role-policy \
 # Wait for role to propagate
 echo "Waiting 10 seconds for IAM role to propagate..."
 sleep 10
-echo "IAM role created."
+ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+ROLE_ARN="arn:aws:iam::${ACCOUNT_ID}:role/${ROLE_NAME}"
+echo "IAM role ready. ARN: ${ROLE_ARN}"
 echo ""
 
 # ---- Step 2: Upload Glue scripts ----
@@ -101,11 +114,20 @@ echo ""
 # ---- Step 3: Create Glue jobs ----
 echo "Step 3: Creating Glue jobs..."
 
+ALL_ENTITIES="works authors institutions sources publishers topics funders domains fields subfields awards concepts continents countries institution-types keywords languages licenses sdgs source-types work-types"
+
+# Delete any existing jobs first (makes re-runs safe)
+echo "  Cleaning up old jobs (if any)..."
+for ENTITY in ${ALL_ENTITIES}; do
+    aws glue delete-job --job-name "openalex-convert-${ENTITY}" 2>/dev/null
+done
+echo "  Done."
+
 # Works job (large, needs more resources)
 echo "  Creating job: openalex-convert-works"
 aws glue create-job \
     --name "openalex-convert-works" \
-    --role "${ROLE_NAME}" \
+    --role "${ROLE_ARN}" \
     --command "{
         \"Name\": \"glueetl\",
         \"ScriptLocation\": \"s3://${BUCKET}/${SCRIPTS_PREFIX}/convert_works.py\",
@@ -122,16 +144,17 @@ aws glue create-job \
     --worker-type "G.2X" \
     --number-of-workers 25 \
     --timeout 240 \
-    2>/dev/null && echo "    ✓ Created" || echo "    (already exists or error)"
+    > /dev/null \
+    && echo "    ✓ Created" || echo "    ✗ FAILED (see error above)"
 
 # All other entities
-SMALL_ENTITIES="authors institutions sources publishers topics funders domains fields subfields"
+SMALL_ENTITIES="authors institutions sources publishers topics funders domains fields subfields awards concepts continents countries institution-types keywords languages licenses sdgs source-types work-types"
 
 for ENTITY in ${SMALL_ENTITIES}; do
     echo "  Creating job: openalex-convert-${ENTITY}"
     aws glue create-job \
         --name "openalex-convert-${ENTITY}" \
-        --role "${ROLE_NAME}" \
+        --role "${ROLE_ARN}" \
         --command "{
             \"Name\": \"glueetl\",
             \"ScriptLocation\": \"s3://${BUCKET}/${SCRIPTS_PREFIX}/convert_small_entity.py\",
@@ -148,21 +171,18 @@ for ENTITY in ${SMALL_ENTITIES}; do
         --worker-type "G.1X" \
         --number-of-workers 10 \
         --timeout 120 \
-        2>/dev/null && echo "    ✓ Created" || echo "    (already exists or error)"
+        > /dev/null \
+        && echo "    ✓ Created" || echo "    ✗ FAILED (see error above)"
 done
 echo ""
 
 # ---- Step 4: Run all jobs ----
 echo "Step 4: Starting all Glue jobs..."
 
-echo "  Starting: openalex-convert-works"
-aws glue start-job-run --job-name "openalex-convert-works" > /dev/null 2>&1 \
-    && echo "    ✓ Started" || echo "    ✗ Failed to start"
-
-for ENTITY in ${SMALL_ENTITIES}; do
+for ENTITY in ${ALL_ENTITIES}; do
     echo "  Starting: openalex-convert-${ENTITY}"
-    aws glue start-job-run --job-name "openalex-convert-${ENTITY}" > /dev/null 2>&1 \
-        && echo "    ✓ Started" || echo "    ✗ Failed to start"
+    aws glue start-job-run --job-name "openalex-convert-${ENTITY}" > /dev/null \
+        && echo "    ✓ Started" || echo "    ✗ FAILED (see error above)"
 done
 
 echo ""

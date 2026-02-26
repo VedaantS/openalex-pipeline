@@ -78,6 +78,72 @@ STORED AS PARQUET
 LOCATION 's3://your-bucket/openalex-parquet/subfields/'
 TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
 
+-- Awards
+CREATE EXTERNAL TABLE IF NOT EXISTS openalex.awards
+STORED AS PARQUET
+LOCATION 's3://your-bucket/openalex-parquet/awards/'
+TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
+
+-- Concepts (legacy)
+CREATE EXTERNAL TABLE IF NOT EXISTS openalex.concepts
+STORED AS PARQUET
+LOCATION 's3://your-bucket/openalex-parquet/concepts/'
+TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
+
+-- Continents
+CREATE EXTERNAL TABLE IF NOT EXISTS openalex.continents
+STORED AS PARQUET
+LOCATION 's3://your-bucket/openalex-parquet/continents/'
+TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
+
+-- Countries
+CREATE EXTERNAL TABLE IF NOT EXISTS openalex.countries
+STORED AS PARQUET
+LOCATION 's3://your-bucket/openalex-parquet/countries/'
+TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
+
+-- Institution Types
+CREATE EXTERNAL TABLE IF NOT EXISTS openalex.institution_types
+STORED AS PARQUET
+LOCATION 's3://your-bucket/openalex-parquet/institution-types/'
+TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
+
+-- Keywords
+CREATE EXTERNAL TABLE IF NOT EXISTS openalex.keywords
+STORED AS PARQUET
+LOCATION 's3://your-bucket/openalex-parquet/keywords/'
+TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
+
+-- Languages
+CREATE EXTERNAL TABLE IF NOT EXISTS openalex.languages
+STORED AS PARQUET
+LOCATION 's3://your-bucket/openalex-parquet/languages/'
+TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
+
+-- Licenses
+CREATE EXTERNAL TABLE IF NOT EXISTS openalex.licenses
+STORED AS PARQUET
+LOCATION 's3://your-bucket/openalex-parquet/licenses/'
+TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
+
+-- SDGs (Sustainable Development Goals)
+CREATE EXTERNAL TABLE IF NOT EXISTS openalex.sdgs
+STORED AS PARQUET
+LOCATION 's3://your-bucket/openalex-parquet/sdgs/'
+TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
+
+-- Source Types
+CREATE EXTERNAL TABLE IF NOT EXISTS openalex.source_types
+STORED AS PARQUET
+LOCATION 's3://your-bucket/openalex-parquet/source-types/'
+TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
+
+-- Work Types
+CREATE EXTERNAL TABLE IF NOT EXISTS openalex.work_types
+STORED AS PARQUET
+LOCATION 's3://your-bucket/openalex-parquet/work-types/'
+TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
+
 
 -- ---- 3. Verify everything works ----
 
@@ -87,7 +153,10 @@ UNION ALL SELECT 'authors', COUNT(*) FROM openalex.authors
 UNION ALL SELECT 'institutions', COUNT(*) FROM openalex.institutions
 UNION ALL SELECT 'sources', COUNT(*) FROM openalex.sources
 UNION ALL SELECT 'publishers', COUNT(*) FROM openalex.publishers
-UNION ALL SELECT 'topics', COUNT(*) FROM openalex.topics;
+UNION ALL SELECT 'topics', COUNT(*) FROM openalex.topics
+UNION ALL SELECT 'funders', COUNT(*) FROM openalex.funders
+UNION ALL SELECT 'concepts', COUNT(*) FROM openalex.concepts
+UNION ALL SELECT 'keywords', COUNT(*) FROM openalex.keywords;
 
 -- Preview works
 SELECT * FROM openalex.works LIMIT 5;

@@ -64,6 +64,17 @@ REPARTITION_MAP = {
     "domains": 1,
     "fields": 1,
     "subfields": 5,
+    "awards": 1,
+    "concepts": 10,
+    "continents": 1,
+    "countries": 1,
+    "institution-types": 1,
+    "keywords": 10,
+    "languages": 1,
+    "licenses": 1,
+    "sdgs": 1,
+    "source-types": 1,
+    "work-types": 1,
 }
 num_partitions = REPARTITION_MAP.get(entity, 20)
 
